@@ -1,1 +1,1 @@
-# Streamlit_test
+streamlit run test.py
