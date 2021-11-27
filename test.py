@@ -1,120 +1,33 @@
 import streamlit as st
-
 import numpy as np
 
-import matplotlib.pyplot as plt
+from plot import plot_ecdf_dict, plot_power_dict, plot_hist
 
 
-def ecdf(sample):
-    """
-    Считает x, y для cdf
-    :param sample: данные p
-    """
-    x, counts = np.unique(sample, return_counts=True)
-    cusum = np.cumsum(counts)
-    return x, cusum / cusum[-1]
+container_cdf = st.container()
+container_param_power_hist = st.container()
 
-def plot_ecdf(sample):
-    """
-    Строит cdf
-    :param sample: данные p
-    """
-    x, y = ecdf(sample)
-    x = np.insert(x, 0, x[0])
-    y = np.insert(y, 0, 0.)
-    plt.plot(x, y, drawstyle='steps-post', linewidth = 2)
+col_power_hist, _, col_param = container_param_power_hist.columns([6, 1, 4])
+col_cdf_AB, col_cdf_AA = container_cdf.columns(2)
 
-def plot_all(tests_dict):
-    """
-    Строит гистаграму и кумулятивную функцию плотности (cdf)
-    :param tests_dict = {
-        'name_tests': {
-            'power': 'float'
-            'AB_test': np.array('float')
-            'alfa': 'float'
-            'AA_test': np.array('float')
-        }
-    }
-    """
-    #x, y = ecdf(tests_dict['ttest']['AB_test'])
-    #x = np.insert(x, 0, x[0])
-    #y = np.insert(y, 0, 0.)
-    #chart_data = pd.DataFrame(np.array([np.array(x)]+[np.array(y)]).T, columns=['a', 'b'] )
-    
-    #chart = st.line_chart(x)
-    #chart.add_rows(y)
-    #st.line_chart(chart_data).encode(x='a', y='b')
-    
-    gridsize = (2, 2)
-    fig = plt.figure(figsize=(16, 16))
-
-    plt.subplot2grid(gridsize, (0, 0))
-    for name_test in tests_dict:
-        plot_ecdf(tests_dict[name_test]['AB_test'])
-    plt.title('Simulated p-value CDFs under H1')
-    plt.xlim([-0.05, 1.05])
-    plt.ylim([-0.05, 1.05])
-    plt.grid(True)
-
-    plt.subplot2grid(gridsize, (0, 1))
-    for name_test in tests_dict:
-        plot_ecdf(tests_dict[name_test]['AA_test'])
-    plt.title('Simulated p-value CDFs under H0')
-    plt.xlim([-0.05, 1.05])
-    plt.ylim([-0.05, 1.05])
-    plt.grid(True)
-    
-    #plt.subplot2grid(gridsize, (6, 7), colspan=4, rowspan=4)
-    #for name_test in tests_dict:
-    #    plt.hist(tests_dict[name_test]['AB_test'], bins=70, alpha=0.4)
-    #plt.title('histogram')
-    #plt.grid(True)
-
-    plt.subplot2grid(gridsize, (1, 0), colspan=2)
-    index = 0
-    power = []
-    for name_test in tests_dict:
-        index += 1
-        plt.barh([index], [tests_dict[name_test]['power']], alpha=0.4)
-    index = np.arange(index)
-    plt.yticks(index + 1, tests_dict.keys())
-    plt.title('Test power')
-    plt.xlim([-0.05, 1.05])
-    plt.ylim([0, index[-1] + 2])
-    plt.grid(True)
-
-    st.pyplot(fig)
-
-
-
-
-st.title("Этот титул")
-st.write(
-    """
-    # Это заголовок
-    Это текст
-    """
-)
-st.write("""# Выберите параметры""")
+col_param.write("#### Параметры")
 #std_coef = st.slider("std_coef", 0.001, 0.01, step=0.00225, format='%f')
-std_coef = st.slider("std_coef", 0.001, 0.0055, step=0.00225, format='%f')
-zones_corr = st.slider("zones_corr", 0.1, 0.8, step=0.175, format='%f')
-effect_size = st.slider("effect_size", 0.002, 0.006, step=0.001, format='%f')
+std_coef = col_param.slider("Стандортное отклонение", 0.001, 0.0055, step=0.00225, format='%f')
+zones_corr = col_param.slider("Корреляцмя м/у соседними зонами", 0.1, 0.8, step=0.175, format='%f')
+effect_size = col_param.slider("Effect size", 0.002, 0.006, step=0.001, format='%f')
+col_param.write("#### Тесты")
+checkbox_ttest = col_param.checkbox('ttest', value = True)
+checkbox_mannwhitneyu = col_param.checkbox('mannwhitneyu', value = False)
 
-st.write("""# Выберите тесты для отображения""")
-checkbox_ttest = st.checkbox('ttest', value = True)
-checkbox_mannwhitneyu = st.checkbox('mannwhitneyu', value = False)
-
-
-stat_test = []
+baseline_test = []
 if checkbox_ttest:
-    stat_test.append('ttest')
+    baseline_test.append('ttest')
 if checkbox_mannwhitneyu:
-    stat_test.append('mannwhitneyu')
+    baseline_test.append('mannwhitneyu')
 
 if checkbox_ttest + checkbox_mannwhitneyu:
     tests_dict={}
-    for name_test in stat_test:
+    for name_test in baseline_test:
         file_name_AB_test = 'baseline/std_coef_%f_zones_corr_%f_effect_size_%f_%s'%(
                 std_coef,
                 zones_corr,
@@ -143,9 +56,15 @@ if checkbox_ttest + checkbox_mannwhitneyu:
             'alfa': alfa,
             'AA_test': AA_test
         }
+
+    col_cdf_AB.write("#### Simulated p-value CDFs under H1")
+    col_cdf_AB.pyplot(plot_ecdf_dict(tests_dict=tests_dict, test_v='AB_test'))
+    col_cdf_AA.write("#### Simulated p-value CDFs under H0")
+    col_cdf_AA.pyplot(plot_ecdf_dict(tests_dict=tests_dict, test_v='AA_test'))
+    col_power_hist.write("#### Power")
+    col_power_hist.pyplot(plot_power_dict(tests_dict=tests_dict))
+    col_power_hist.write("#### Hist")
+    col_power_hist.pyplot(plot_hist(AB_test, AA_test))
+
     
-    plot_all(tests_dict=tests_dict)
-
-
-
 
