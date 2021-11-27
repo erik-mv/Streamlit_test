@@ -44,7 +44,9 @@ def plot_power_dict(tests_dict):
 
 def plot_hist(control, test):
     fig = plt.figure(figsize=(6, 6))
-    plt.hist(control, bins=70, alpha=0.4)
-    plt.hist(test, bins=70, alpha=0.4)
+    plt.hist(control, bins=70, alpha=0.4, facecolor='b', label='Control')
+    plt.hist(test, bins=70, alpha=0.4, facecolor='r', label='Test')
+    plt.legend(fontsize=18)
     plt.grid(True)
+    
     return fig

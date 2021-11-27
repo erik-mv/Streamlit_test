@@ -63,8 +63,19 @@ if checkbox_ttest + checkbox_mannwhitneyu:
     col_cdf_AA.pyplot(plot_ecdf_dict(tests_dict=tests_dict, test_v='AA_test'))
     col_power_hist.write("#### Power")
     col_power_hist.pyplot(plot_power_dict(tests_dict=tests_dict))
+
+    file_name_hist = 'hist/std_coef_%f_zones_corr_%f_effect_size_%f'%(
+                std_coef,
+                zones_corr,
+                effect_size,
+    )
+    file = open(file_name_hist, 'r')
+    control = np.array(file.readline().split()).astype(float)
+    test = np.array(file.readline().split()).astype(float)
+    file.close()
+
     col_power_hist.write("#### Hist")
-    col_power_hist.pyplot(plot_hist(AB_test, AA_test))
+    col_power_hist.pyplot(plot_hist(control, test))
 
     
 
