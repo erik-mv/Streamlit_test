@@ -1,6 +1,9 @@
-import numpy as np
 import streamlit as st
+
+import numpy as np
+
 import matplotlib.pyplot as plt
+
 
 def ecdf(sample):
     """
@@ -33,6 +36,15 @@ def plot_all(tests_dict):
         }
     }
     """
+    #x, y = ecdf(tests_dict['ttest']['AB_test'])
+    #x = np.insert(x, 0, x[0])
+    #y = np.insert(y, 0, 0.)
+    #chart_data = pd.DataFrame(np.array([np.array(x)]+[np.array(y)]).T, columns=['a', 'b'] )
+    
+    #chart = st.line_chart(x)
+    #chart.add_rows(y)
+    #st.line_chart(chart_data).encode(x='a', y='b')
+    
     gridsize = (2, 2)
     fig = plt.figure(figsize=(16, 16))
 
@@ -84,16 +96,15 @@ st.write(
     """
 )
 st.write("""# Выберите параметры""")
-
 #std_coef = st.slider("std_coef", 0.001, 0.01, step=0.00225, format='%f')
 std_coef = st.slider("std_coef", 0.001, 0.0055, step=0.00225, format='%f')
 zones_corr = st.slider("zones_corr", 0.1, 0.8, step=0.175, format='%f')
 effect_size = st.slider("effect_size", 0.002, 0.006, step=0.001, format='%f')
 
-
+st.write("""# Выберите тесты для отображения""")
 checkbox_ttest = st.checkbox('ttest', value = True)
 checkbox_mannwhitneyu = st.checkbox('mannwhitneyu', value = False)
-st.write("""# Выберите тесты для отображения""")
+
 
 stat_test = []
 if checkbox_ttest:
