@@ -11,13 +11,13 @@ col_power_hist, _, col_param = container_param_power_hist.columns([6, 1, 4])
 col_cdf_AB, col_cdf_AA = container_cdf.columns(2)
 
 col_param.write("#### Параметры")
-#std_coef = st.slider("std_coef", 0.001, 0.01, step=0.00225, format='%f')
-std_coef = col_param.slider("Стандортное отклонение", 0.001, 0.0055, step=0.00225, format='%f')
+std_coef = col_param.slider("Стандортное отклонение", 0.001, 0.01, step=0.00225, format='%f')
 zones_corr = col_param.slider("Корреляцмя м/у соседними зонами", 0.1, 0.8, step=0.175, format='%f')
 effect_size = col_param.slider("Effect size", 0.002, 0.006, step=0.001, format='%f')
 col_param.write("#### Тесты")
-checkbox_ttest = col_param.checkbox('ttest', value = True)
 checkbox_mannwhitneyu = col_param.checkbox('mannwhitneyu', value = False)
+checkbox_ttest = col_param.checkbox('ttest', value = True)
+
 
 baseline_test = []
 if checkbox_ttest:
@@ -38,7 +38,7 @@ if checkbox_ttest + checkbox_mannwhitneyu:
         power = float(file.readline())
         AB_test = np.array(file.readline().split()).astype(float)
         file.close()
-
+        
         file_name_AA_test = 'baseline/std_coef_%f_zones_corr_%f_effect_size_%f_%s'%(
                 std_coef,
                 zones_corr,
