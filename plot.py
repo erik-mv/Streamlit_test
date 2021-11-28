@@ -1,29 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-def ecdf(sample):
-    """
-    Считает x, y для cdf
-    :param sample: данные p
-    """
-    x, counts = np.unique(sample, return_counts=True)
-    cusum = np.cumsum(counts)
-    return x, cusum / cusum[-1]
 
-def plot_ecdf(sample):
-    """
-    Строит cdf
-    :param sample: данные p
-    """
-    x, y = ecdf(sample)
-    x = np.insert(x, 0, x[0])
-    y = np.insert(y, 0, 0.)
-    plt.plot(x, y, drawstyle='steps-post', linewidth = 2)
-
-def plot_ecdf_dict(tests_dict, test_v='AB_test'):
+def plot_ecdf_dict(tests_dict, test_v='AB'):
     fig = plt.figure(figsize=(6, 6))
     for name_test in tests_dict:
-        plot_ecdf(tests_dict[name_test][test_v])
+        x =  tests_dict[name_test][test_v + '_cdf_x']
+        y =  tests_dict[name_test][test_v + '_cdf_y']
+        plt.plot(x, y, drawstyle='steps-post', linewidth = 2)
     plt.xlim([-0.05, 1.05])
     plt.ylim([-0.05, 1.05])
     plt.grid(True)
@@ -48,5 +32,4 @@ def plot_hist(control, test):
     plt.hist(test, bins=70, alpha=0.4, facecolor='r', label='Test')
     plt.legend(fontsize=18)
     plt.grid(True)
-    
     return fig

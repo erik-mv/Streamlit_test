@@ -37,6 +37,8 @@ if checkbox_ttest + checkbox_mannwhitneyu:
         file = open(file_name_AB_test, 'r')
         power = float(file.readline())
         AB_test = np.array(file.readline().split()).astype(float)
+        AB_cdf_x = np.array(file.readline().split()).astype(float)
+        AB_cdf_y = np.array(file.readline().split()).astype(float)
         file.close()
         
         file_name_AA_test = 'baseline/std_coef_%f_zones_corr_%f_effect_size_%f_%s'%(
@@ -48,19 +50,25 @@ if checkbox_ttest + checkbox_mannwhitneyu:
         file = open(file_name_AA_test, 'r')
         alfa = float(file.readline())
         AA_test = np.array(file.readline().split()).astype(float)
+        AA_cdf_x = np.array(file.readline().split()).astype(float)
+        AA_cdf_y = np.array(file.readline().split()).astype(float)
         file.close()
 
         tests_dict[name_test]={
             'power': power,
             'AB_test': AB_test,
+            'AB_cdf_x': AB_cdf_x,
+            'AB_cdf_y': AB_cdf_y,
             'alfa': alfa,
-            'AA_test': AA_test
+            'AA_test': AA_test,
+            'AA_cdf_x': AA_cdf_x,
+            'AA_cdf_y': AA_cdf_y,
         }
 
     col_cdf_AB.write("#### Simulated p-value CDFs under H1")
-    col_cdf_AB.pyplot(plot_ecdf_dict(tests_dict=tests_dict, test_v='AB_test'))
+    col_cdf_AB.pyplot(plot_ecdf_dict(tests_dict=tests_dict, test_v='AB'))
     col_cdf_AA.write("#### Simulated p-value CDFs under H0")
-    col_cdf_AA.pyplot(plot_ecdf_dict(tests_dict=tests_dict, test_v='AA_test'))
+    col_cdf_AA.pyplot(plot_ecdf_dict(tests_dict=tests_dict, test_v='AA'))
     col_power_hist.write("#### Power")
     col_power_hist.pyplot(plot_power_dict(tests_dict=tests_dict))
 
