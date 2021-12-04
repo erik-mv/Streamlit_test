@@ -48,7 +48,7 @@ def baseline(sidebar):
     zones_corr = sidebar.slider("Корреляцмя м/у соседними зонами", 0.1, 0.8, step=0.175, format='%f')
     effect_size = sidebar.slider("Effect size", 0.002, 0.006, step=0.001, format='%f')
     
-    col_cdf, _, col_power_hist = st.columns((10, 3, 13))
+    _, col_cdf, _, col_power_hist, _ = st.columns((3, 10, 3, 13, 3))
 
     baseline_test = []
     if checkbox_ttest:
