@@ -1,6 +1,7 @@
 import streamlit as st
 import numpy as np
 from plot import plot_ecdf_dict, plot_power_dict, plot_hist
+import os
 
 def sbar():
     sidebar = st.sidebar
@@ -166,19 +167,29 @@ def outliers(sidebar):
     ) = get_checkbox_slider(
             sidebar, 
             names_test=['ttest', 'mannwhitneyu', 'bootstrap'], 
-            std_coef={'start': 0.0055, 'stop': 0.0055, 'step': 0.00225},
-            zones_corr={'start': 0.625, 'stop': 0.625, 'step': 0.175},
-            effect_size={'start': 0.005, 'stop': 0.005, 'step': 0.001},
+            std_coef={'start': 0.001, 'stop': 0.01, 'step': 0.00225},
+            zones_corr={'start': 0.1, 'stop': 0.8, 'step': 0.175},
+            effect_size={'start': 0.002, 'stop': 0.006, 'step': 0.001},
             )
 
     if (len(activ_names_test)):
         tests_dict={}
         for name_test in activ_names_test:
             file_name_AB_test = get_file_name_test('outliers/', std_coef, zones_corr, effect_size, name_test)
-            power, AB_test, AB_cdf_x, AB_cdf_y = read_file_test(file_name_AB_test)
+            power = 0
+            AB_test = []
+            AB_cdf_x = []
+            AB_cdf_y = []
+            if os.path.exists(file_name_AB_test):
+                power, AB_test, AB_cdf_x, AB_cdf_y = read_file_test(file_name_AB_test)
         
             file_name_AA_test = get_file_name_test('outliers/', std_coef, zones_corr, 0.0, name_test)
-            alfa, AA_test, AA_cdf_x, AA_cdf_y = read_file_test(file_name_AA_test)
+            alfa = 0
+            AA_test = []
+            AA_cdf_x = []
+            AA_cdf_y = []
+            if os.path.exists(file_name_AA_test):
+                alfa, AA_test, AA_cdf_x, AA_cdf_y = read_file_test(file_name_AA_test)
 
             tests_dict[name_test]={
                 'power': power,
@@ -215,19 +226,30 @@ def stratification(sidebar):
     ) = get_checkbox_slider(
             sidebar, 
             names_test=['ttest', 'mannwhitneyu', 'bootstrap'], 
-            std_coef={'start': 0.0055, 'stop': 0.0055, 'step': 0.00225},
-            zones_corr={'start': 0.625, 'stop': 0.625, 'step': 0.175},
-            effect_size={'start': 0.005, 'stop': 0.005, 'step': 0.001},
+            std_coef={'start': 0.001, 'stop': 0.01, 'step': 0.00225},
+            zones_corr={'start': 0.1, 'stop': 0.8, 'step': 0.175},
+            effect_size={'start': 0.002, 'stop': 0.006, 'step': 0.001},
             )
 
     if (len(activ_names_test)):
         tests_dict={}
         for name_test in activ_names_test:
             file_name_AB_test = get_file_name_test('stratification/', std_coef, zones_corr, effect_size, name_test)
-            power, AB_test, AB_cdf_x, AB_cdf_y = read_file_test(file_name_AB_test)
+            
+            power = 0
+            AB_test = []
+            AB_cdf_x = []
+            AB_cdf_y = []
+            if os.path.exists(file_name_AB_test):
+                power, AB_test, AB_cdf_x, AB_cdf_y = read_file_test(file_name_AB_test)
         
             file_name_AA_test = get_file_name_test('stratification/', std_coef, zones_corr, 0.0, name_test)
-            alfa, AA_test, AA_cdf_x, AA_cdf_y = read_file_test(file_name_AA_test)
+            alfa = 0
+            AA_test = []
+            AA_cdf_x = []
+            AA_cdf_y = []
+            if os.path.exists(file_name_AA_test):
+                alfa, AA_test, AA_cdf_x, AA_cdf_y = read_file_test(file_name_AA_test)
 
             tests_dict[name_test]={
                 'power': power,
@@ -264,19 +286,29 @@ def cuped(sidebar):
     ) = get_checkbox_slider(
             sidebar, 
             names_test=['ttest', 'mannwhitneyu', 'bootstrap'], 
-            std_coef={'start': 0.0055, 'stop': 0.0055, 'step': 0.00225},
-            zones_corr={'start': 0.625, 'stop': 0.625, 'step': 0.175},
-            effect_size={'start': 0.005, 'stop': 0.005, 'step': 0.001},
+            std_coef={'start': 0.001, 'stop': 0.01, 'step': 0.00225},
+            zones_corr={'start': 0.1, 'stop': 0.8, 'step': 0.175},
+            effect_size={'start': 0.002, 'stop': 0.006, 'step': 0.001},
             )
 
     if (len(activ_names_test)):
         tests_dict={}
         for name_test in activ_names_test:
             file_name_AB_test = get_file_name_test('cuped/', std_coef, zones_corr, effect_size, name_test)
-            power, AB_test, AB_cdf_x, AB_cdf_y = read_file_test(file_name_AB_test)
-        
+            power = 0
+            AB_test = []
+            AB_cdf_x = []
+            AB_cdf_y = []
+            if os.path.exists(file_name_AB_test):
+                power, AB_test, AB_cdf_x, AB_cdf_y = read_file_test(file_name_AB_test)
+
             file_name_AA_test = get_file_name_test('cuped/', std_coef, zones_corr, 0.0, name_test)
-            alfa, AA_test, AA_cdf_x, AA_cdf_y = read_file_test(file_name_AA_test)
+            alfa = 0
+            AA_test = []
+            AA_cdf_x = []
+            AA_cdf_y = []
+            if os.path.exists(file_name_AA_test):
+                alfa, AA_test, AA_cdf_x, AA_cdf_y = read_file_test(file_name_AA_test)
 
             tests_dict[name_test]={
                 'power': power,
