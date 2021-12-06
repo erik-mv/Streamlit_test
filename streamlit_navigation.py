@@ -334,6 +334,65 @@ def cuped(sidebar):
         )
         plot_power_and_hist(col_power_hist, tests_dict, file_name_hist)
 
+def cupac(sidebar):
+    (
+        activ_names_test,
+        std_coef,
+        zones_corr,
+        effect_size,
+        col_cdf,
+        col_power_hist
+    ) = get_checkbox_slider(
+            sidebar, 
+            names_test=['ttest', 'mannwhitneyu', 'bootstrap'], 
+            std_coef={'start': 0.001, 'stop': 0.01, 'step': 0.00225},
+            zones_corr={'start': 0.1, 'stop': 0.8, 'step': 0.175},
+            effect_size={'start': 0.002, 'stop': 0.006, 'step': 0.001},
+            )
+
+    if (len(activ_names_test)):
+        tests_dict={}
+        for name_test in activ_names_test:
+            file_name_AB_test = get_file_name_test('cupac/', std_coef, zones_corr, effect_size, name_test)
+            power = 0
+            AB_test = []
+            AB_cdf_x = []
+            AB_cdf_y = []
+            if os.path.exists(file_name_AB_test):
+                power, AB_test, AB_cdf_x, AB_cdf_y = read_file_test(file_name_AB_test)
+
+            file_name_AA_test = get_file_name_test('cupac/', std_coef, zones_corr, 0.0, name_test)
+            alfa = 0
+            AA_test = []
+            AA_cdf_x = []
+            AA_cdf_y = []
+            if os.path.exists(file_name_AA_test):
+                alfa, AA_test, AA_cdf_x, AA_cdf_y = read_file_test(file_name_AA_test)
+
+            tests_dict[name_test]={
+                'power': power,
+                'AB_test': AB_test,
+                'AB_cdf_x': AB_cdf_x,
+                'AB_cdf_y': AB_cdf_y,
+                'alfa': alfa,
+                'AA_test': AA_test,
+                'AA_cdf_x': AA_cdf_x,
+                'AA_cdf_y': AA_cdf_y,
+            }
+
+        col_cdf.write("#### CDFs under H1")
+        col_cdf.pyplot(plot_ecdf_dict(tests_dict=tests_dict, test_v='AB', plot_legend=True))
+        col_cdf.write("#### CDFs under H0")
+        col_cdf.pyplot(plot_ecdf_dict(tests_dict=tests_dict, test_v='AA'))
+
+
+        file_name_hist = 'hist/std_coef_%f_zones_corr_%f_effect_size_%f'%(
+            std_coef,
+            zones_corr,
+            effect_size,
+        )
+        plot_power_and_hist(col_power_hist, tests_dict, file_name_hist)
+
 def navigation(sidebar, cheak_name):
     if cheak_name == 'Введение':
         introduction()
@@ -345,4 +404,7 @@ def navigation(sidebar, cheak_name):
         stratification(sidebar)
     elif cheak_name == 'CUPED':
         cuped(sidebar)
+    elif cheak_name == 'CUPAC':
+        cupac(sidebar)
+        
         
