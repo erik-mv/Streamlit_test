@@ -3,8 +3,7 @@ from streamlit_navigation import sbar, navigation
 
 st.set_page_config(layout="wide")
 
-sidebar, cheak_name = sbar()
+st.write('# Применение ML для ускорения switchback A/B тестирования')
 
-st.write('# Применение ML для ускорения А/В тестирования')
-
-navigation(sidebar, cheak_name=cheak_name)
+col_cdf, col_power_hist, activ_names_test, std_coef, zones_corr, effect_size = sbar()
+navigation(col_cdf, col_power_hist, activ_names_test, std_coef, zones_corr, effect_size)

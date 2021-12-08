@@ -7,37 +7,66 @@ def sbar():
     sidebar = st.sidebar
 
     sidebar.write('# Навигатор')
-    cheak_name = sidebar.radio('', (
-        'Введение',
-        'Постановка задачи',
-        'Baseline',
-        'Фильтрация выбросов распределения',
-        'Стратификация',
-        'CUPED',
-        'Линеаризация',
-        'CUPAC',
-    ))
-    
-    return sidebar, cheak_name
+    cheak_name = sidebar.radio('', ('Baseline', 'Оптимизации'))
 
-def introduction():  
-    st.write(
-        """
-    Всем, привет! В данной работе рассмотрены способы ускорения
-    __switch-back A/B__ тестов. Работу выполнили студенты академии
-    больших данных __MADE__ в качестве выпускного проекта. 
-
-    - __Шевчук Анастасия__ – EDA, классические методы
-    - __Чаусов Дмитрий__ – EDA, ML-методы
-    - __Гудков Дмитрий__ – EDA, ML-методы
-    - __Дронов Артем__ – EDA, разработка пайплайна, визуализация
-    - __Муллагалиев Эрик__ – EDA, разработка пайплайна, визуализация
-
-    Автором идеи и ментор выступил __Максимов Иван__ - Data Scientist в __Delivery Club__.
-
-    Исследование проводится на синтетических данных, сгенерированных на основе реальных данных, предоставленных __Delivery Club__.
-        """
+    sidebar.write("# Параметры")
+    std_coef = sidebar.slider(
+        "Стандартное отклонение",
+        0.001,
+        0.01,
+        step=0.00225,
+        format='%f',
     )
+
+    zones_corr = sidebar.slider(
+        "Корреляция между соседними зонами",
+        0.1,
+        0.8,
+        step=0.175,
+        format='%f',
+    )
+    effect_size = sidebar.slider(
+        "Размер эффекта",
+        0.002,
+        0.006,
+        step=0.001,
+        format='%f',
+    )
+
+    _, col_cdf, _, col_power_hist, _ = st.columns((3, 10, 2, 14, 3))
+
+    activ_names_test = []
+    sidebar.write("# Тесты")
+    if cheak_name == 'Baseline':
+        checkbox_ttest = sidebar.checkbox('T-тест', value = True)
+        checkbox_mannwhitneyu = sidebar.checkbox('U-тест', value = False)
+        checkbox_bootstrap = sidebar.checkbox('Bootstrap', value = False)
+
+        if checkbox_ttest:
+            activ_names_test.append(['T-тест', 'baseline/', 'ttest'])
+        if checkbox_mannwhitneyu:
+            activ_names_test.append(['U-тест', 'baseline/', 'mannwhitneyu'])
+        if checkbox_bootstrap:
+            activ_names_test.append(['Bootstrap', 'baseline/', 'bootstrap'])
+    else:
+        checkbox_baseline = sidebar.checkbox('Baseline', value = True)
+        checkbox_outliers = sidebar.checkbox('Фильтрация выбросов', value = False)
+        checkbox_stratification = sidebar.checkbox('Стратификация', value = False)
+        checkbox_cuped = sidebar.checkbox('CUPED', value = False)
+        checkbox_cupac = sidebar.checkbox('CUPAC', value = False)
+
+        if checkbox_baseline:
+            activ_names_test.append(['Baseline', 'baseline/', 'bootstrap'])
+        if checkbox_outliers:
+            activ_names_test.append(['Фил-ция', 'outliers/', 'bootstrap'])
+        if checkbox_stratification:
+            activ_names_test.append(['Страт-ция', 'stratification/', 'bootstrap'])
+        if checkbox_cuped:
+            activ_names_test.append(['CUPED', 'cuped/', 'bootstrap'])
+        if checkbox_cupac:
+            activ_names_test.append(['CUPAC', 'cupac/', 'bootstrap'])
+
+    return col_cdf, col_power_hist, activ_names_test, std_coef, zones_corr, effect_size
 
 def get_file_name_test(path_folder, std_coef, zones_corr, effect_size, name_test):
     return '%sstd_coef_%f_zones_corr_%f_effect_size_%f_%s'%(
@@ -58,243 +87,23 @@ def read_file_test(file_name_test):
 
     return power, test, cdf_x, cdf_y
 
-def get_checkbox_slider(sidebar, names_test, std_coef, zones_corr, effect_size):
-    sidebar.write("# Тесты")
-    checkbox = []
-    for name_test in names_test:
-        checkbox.append(sidebar.checkbox(name_test, value = True))
-
-    activ_names_test = []
-    for i in range(len(checkbox)):
-        if checkbox[i]:
-            activ_names_test.append(names_test[i])
-    
-    sidebar.write("# Параметры")
-    std_coef = sidebar.slider(
-        "Стандортное отклонение",
-        std_coef['start'],
-        std_coef['stop'],
-        step=std_coef['step'],
-        format='%f',
-    )
-    zones_corr = sidebar.slider(
-        "Корреляцмя м/у соседними зонами",
-        zones_corr['start'],
-        zones_corr['stop'],
-        step=zones_corr['step'],
-        format='%f',
-    )
-    effect_size = sidebar.slider(
-        "Effect size",
-        effect_size['start'],
-        effect_size['stop'],
-        step=effect_size['step'],
-        format='%f',
-    )
-
-    _, col_cdf, _, col_power_hist, _ = st.columns((3, 10, 3, 13, 3))
-
-    return activ_names_test, std_coef, zones_corr, effect_size, col_cdf, col_power_hist 
 
 def plot_power_and_hist(col_power_hist, tests_dict, file_name_hist):
-    col_power_hist.write("#### Power")
+    col_power_hist.write("#### Мощность")
     col_power_hist.pyplot(plot_power_dict(tests_dict=tests_dict))
 
     file = open(file_name_hist, 'r')
     value = np.array(file.readline().split()).astype(float)
     file.close()
 
-    col_power_hist.write("#### Hist")
+    col_power_hist.write("#### Гистограмма")
     col_power_hist.pyplot(plot_hist(value))
 
-def baseline(sidebar):
-    (
-        activ_names_test,
-        std_coef,
-        zones_corr,
-        effect_size,
-        col_cdf,
-        col_power_hist
-    ) = get_checkbox_slider(
-            sidebar, 
-            names_test=['ttest', 'mannwhitneyu', 'bootstrap'], 
-            std_coef={'start': 0.001, 'stop': 0.01, 'step': 0.00225},
-            zones_corr={'start': 0.1, 'stop': 0.8, 'step': 0.175},
-            effect_size={'start': 0.002, 'stop': 0.006, 'step': 0.001},
-            )
-
+def navigation(col_cdf, col_power_hist, activ_names_test, std_coef, zones_corr, effect_size):
     if (len(activ_names_test)):
         tests_dict={}
         for name_test in activ_names_test:
-            file_name_AB_test = get_file_name_test('baseline/', std_coef, zones_corr, effect_size, name_test)
-            power, AB_test, AB_cdf_x, AB_cdf_y = read_file_test(file_name_AB_test)
-        
-            file_name_AA_test = get_file_name_test('baseline/', std_coef, zones_corr, 0.0, name_test)
-            alfa, AA_test, AA_cdf_x, AA_cdf_y = read_file_test(file_name_AA_test)
-
-            tests_dict[name_test]={
-                'power': power,
-                'AB_test': AB_test,
-                'AB_cdf_x': AB_cdf_x,
-                'AB_cdf_y': AB_cdf_y,
-                'alfa': alfa,
-                'AA_test': AA_test,
-                'AA_cdf_x': AA_cdf_x,
-                'AA_cdf_y': AA_cdf_y,
-            }
-
-        col_cdf.write("#### CDFs under H1")
-        col_cdf.pyplot(plot_ecdf_dict(tests_dict=tests_dict, test_v='AB', plot_legend=True))
-        col_cdf.write("#### CDFs under H0")
-        col_cdf.pyplot(plot_ecdf_dict(tests_dict=tests_dict, test_v='AA'))
-
-
-        file_name_hist = 'hist/std_coef_%f_zones_corr_%f_effect_size_%f'%(
-            std_coef,
-            zones_corr,
-            effect_size,
-        )
-        plot_power_and_hist(col_power_hist, tests_dict, file_name_hist)
-
-def outliers(sidebar):
-    (
-        activ_names_test,
-        std_coef,
-        zones_corr,
-        effect_size,
-        col_cdf,
-        col_power_hist
-    ) = get_checkbox_slider(
-            sidebar, 
-            names_test=['ttest', 'mannwhitneyu', 'bootstrap'], 
-            std_coef={'start': 0.001, 'stop': 0.01, 'step': 0.00225},
-            zones_corr={'start': 0.1, 'stop': 0.8, 'step': 0.175},
-            effect_size={'start': 0.002, 'stop': 0.006, 'step': 0.001},
-            )
-
-    if (len(activ_names_test)):
-        tests_dict={}
-        for name_test in activ_names_test:
-            file_name_AB_test = get_file_name_test('outliers/', std_coef, zones_corr, effect_size, name_test)
-            power = 0
-            AB_test = []
-            AB_cdf_x = []
-            AB_cdf_y = []
-            if os.path.exists(file_name_AB_test):
-                power, AB_test, AB_cdf_x, AB_cdf_y = read_file_test(file_name_AB_test)
-        
-            file_name_AA_test = get_file_name_test('outliers/', std_coef, zones_corr, 0.0, name_test)
-            alfa = 0
-            AA_test = []
-            AA_cdf_x = []
-            AA_cdf_y = []
-            if os.path.exists(file_name_AA_test):
-                alfa, AA_test, AA_cdf_x, AA_cdf_y = read_file_test(file_name_AA_test)
-
-            tests_dict[name_test]={
-                'power': power,
-                'AB_test': AB_test,
-                'AB_cdf_x': AB_cdf_x,
-                'AB_cdf_y': AB_cdf_y,
-                'alfa': alfa,
-                'AA_test': AA_test,
-                'AA_cdf_x': AA_cdf_x,
-                'AA_cdf_y': AA_cdf_y,
-            }
-
-        col_cdf.write("#### CDFs under H1")
-        col_cdf.pyplot(plot_ecdf_dict(tests_dict=tests_dict, test_v='AB', plot_legend=True))
-        col_cdf.write("#### CDFs under H0")
-        col_cdf.pyplot(plot_ecdf_dict(tests_dict=tests_dict, test_v='AA'))
-
-
-        file_name_hist = 'hist/std_coef_%f_zones_corr_%f_effect_size_%f'%(
-            std_coef,
-            zones_corr,
-            effect_size,
-        )
-        plot_power_and_hist(col_power_hist, tests_dict, file_name_hist)
-
-def stratification(sidebar):
-    (
-        activ_names_test,
-        std_coef,
-        zones_corr,
-        effect_size,
-        col_cdf,
-        col_power_hist
-    ) = get_checkbox_slider(
-            sidebar, 
-            names_test=['ttest', 'mannwhitneyu', 'bootstrap'], 
-            std_coef={'start': 0.001, 'stop': 0.01, 'step': 0.00225},
-            zones_corr={'start': 0.1, 'stop': 0.8, 'step': 0.175},
-            effect_size={'start': 0.002, 'stop': 0.006, 'step': 0.001},
-            )
-
-    if (len(activ_names_test)):
-        tests_dict={}
-        for name_test in activ_names_test:
-            file_name_AB_test = get_file_name_test('stratification/', std_coef, zones_corr, effect_size, name_test)
-            
-            power = 0
-            AB_test = []
-            AB_cdf_x = []
-            AB_cdf_y = []
-            if os.path.exists(file_name_AB_test):
-                power, AB_test, AB_cdf_x, AB_cdf_y = read_file_test(file_name_AB_test)
-        
-            file_name_AA_test = get_file_name_test('stratification/', std_coef, zones_corr, 0.0, name_test)
-            alfa = 0
-            AA_test = []
-            AA_cdf_x = []
-            AA_cdf_y = []
-            if os.path.exists(file_name_AA_test):
-                alfa, AA_test, AA_cdf_x, AA_cdf_y = read_file_test(file_name_AA_test)
-
-            tests_dict[name_test]={
-                'power': power,
-                'AB_test': AB_test,
-                'AB_cdf_x': AB_cdf_x,
-                'AB_cdf_y': AB_cdf_y,
-                'alfa': alfa,
-                'AA_test': AA_test,
-                'AA_cdf_x': AA_cdf_x,
-                'AA_cdf_y': AA_cdf_y,
-            }
-
-        col_cdf.write("#### CDFs under H1")
-        col_cdf.pyplot(plot_ecdf_dict(tests_dict=tests_dict, test_v='AB', plot_legend=True))
-        col_cdf.write("#### CDFs under H0")
-        col_cdf.pyplot(plot_ecdf_dict(tests_dict=tests_dict, test_v='AA'))
-
-
-        file_name_hist = 'hist/std_coef_%f_zones_corr_%f_effect_size_%f'%(
-            std_coef,
-            zones_corr,
-            effect_size,
-        )
-        plot_power_and_hist(col_power_hist, tests_dict, file_name_hist)
-
-def cuped(sidebar):
-    (
-        activ_names_test,
-        std_coef,
-        zones_corr,
-        effect_size,
-        col_cdf,
-        col_power_hist
-    ) = get_checkbox_slider(
-            sidebar, 
-            names_test=['ttest', 'mannwhitneyu', 'bootstrap'], 
-            std_coef={'start': 0.001, 'stop': 0.01, 'step': 0.00225},
-            zones_corr={'start': 0.1, 'stop': 0.8, 'step': 0.175},
-            effect_size={'start': 0.002, 'stop': 0.006, 'step': 0.001},
-            )
-
-    if (len(activ_names_test)):
-        tests_dict={}
-        for name_test in activ_names_test:
-            file_name_AB_test = get_file_name_test('cuped/', std_coef, zones_corr, effect_size, name_test)
+            file_name_AB_test = get_file_name_test(name_test[1], std_coef, zones_corr, effect_size, name_test[2])
             power = 0
             AB_test = []
             AB_cdf_x = []
@@ -302,7 +111,7 @@ def cuped(sidebar):
             if os.path.exists(file_name_AB_test):
                 power, AB_test, AB_cdf_x, AB_cdf_y = read_file_test(file_name_AB_test)
 
-            file_name_AA_test = get_file_name_test('cuped/', std_coef, zones_corr, 0.0, name_test)
+            file_name_AA_test = get_file_name_test(name_test[1], std_coef, zones_corr, 0.0, name_test[2])
             alfa = 0
             AA_test = []
             AA_cdf_x = []
@@ -310,7 +119,7 @@ def cuped(sidebar):
             if os.path.exists(file_name_AA_test):
                 alfa, AA_test, AA_cdf_x, AA_cdf_y = read_file_test(file_name_AA_test)
 
-            tests_dict[name_test]={
+            tests_dict[name_test[0]]={
                 'power': power,
                 'AB_test': AB_test,
                 'AB_cdf_x': AB_cdf_x,
@@ -321,10 +130,10 @@ def cuped(sidebar):
                 'AA_cdf_y': AA_cdf_y,
             }
 
-        col_cdf.write("#### CDFs under H1")
+        col_cdf.write("#### CDFs для H1")
         col_cdf.pyplot(plot_ecdf_dict(tests_dict=tests_dict, test_v='AB', plot_legend=True))
-        col_cdf.write("#### CDFs under H0")
-        col_cdf.pyplot(plot_ecdf_dict(tests_dict=tests_dict, test_v='AA'))
+        col_cdf.write("#### CDFs для H0")
+        col_cdf.pyplot(plot_ecdf_dict(tests_dict=tests_dict, test_v='AA', plot_legend=True))
 
 
         file_name_hist = 'hist/std_coef_%f_zones_corr_%f_effect_size_%f'%(
@@ -333,78 +142,3 @@ def cuped(sidebar):
             effect_size,
         )
         plot_power_and_hist(col_power_hist, tests_dict, file_name_hist)
-
-def cupac(sidebar):
-    (
-        activ_names_test,
-        std_coef,
-        zones_corr,
-        effect_size,
-        col_cdf,
-        col_power_hist
-    ) = get_checkbox_slider(
-            sidebar, 
-            names_test=['ttest', 'mannwhitneyu', 'bootstrap'], 
-            std_coef={'start': 0.001, 'stop': 0.01, 'step': 0.00225},
-            zones_corr={'start': 0.1, 'stop': 0.8, 'step': 0.175},
-            effect_size={'start': 0.002, 'stop': 0.006, 'step': 0.001},
-            )
-
-    if (len(activ_names_test)):
-        tests_dict={}
-        for name_test in activ_names_test:
-            file_name_AB_test = get_file_name_test('cupac/', std_coef, zones_corr, effect_size, name_test)
-            power = 0
-            AB_test = []
-            AB_cdf_x = []
-            AB_cdf_y = []
-            if os.path.exists(file_name_AB_test):
-                power, AB_test, AB_cdf_x, AB_cdf_y = read_file_test(file_name_AB_test)
-
-            file_name_AA_test = get_file_name_test('cupac/', std_coef, zones_corr, 0.0, name_test)
-            alfa = 0
-            AA_test = []
-            AA_cdf_x = []
-            AA_cdf_y = []
-            if os.path.exists(file_name_AA_test):
-                alfa, AA_test, AA_cdf_x, AA_cdf_y = read_file_test(file_name_AA_test)
-
-            tests_dict[name_test]={
-                'power': power,
-                'AB_test': AB_test,
-                'AB_cdf_x': AB_cdf_x,
-                'AB_cdf_y': AB_cdf_y,
-                'alfa': alfa,
-                'AA_test': AA_test,
-                'AA_cdf_x': AA_cdf_x,
-                'AA_cdf_y': AA_cdf_y,
-            }
-
-        col_cdf.write("#### CDFs under H1")
-        col_cdf.pyplot(plot_ecdf_dict(tests_dict=tests_dict, test_v='AB', plot_legend=True))
-        col_cdf.write("#### CDFs under H0")
-        col_cdf.pyplot(plot_ecdf_dict(tests_dict=tests_dict, test_v='AA'))
-
-
-        file_name_hist = 'hist/std_coef_%f_zones_corr_%f_effect_size_%f'%(
-            std_coef,
-            zones_corr,
-            effect_size,
-        )
-        plot_power_and_hist(col_power_hist, tests_dict, file_name_hist)
-
-def navigation(sidebar, cheak_name):
-    if cheak_name == 'Введение':
-        introduction()
-    elif cheak_name == 'Baseline':
-        baseline(sidebar)
-    elif cheak_name == 'Фильтрация выбросов распределения':
-        outliers(sidebar)
-    elif cheak_name == 'Стратификация':
-        stratification(sidebar)
-    elif cheak_name == 'CUPED':
-        cuped(sidebar)
-    elif cheak_name == 'CUPAC':
-        cupac(sidebar)
-        
-        
