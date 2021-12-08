@@ -28,7 +28,9 @@ def plot_power_dict(tests_dict):
     index = 0
     for name_test in tests_dict:
         index += 1
-        plt.barh([-index], [tests_dict[name_test]['power']], alpha=0.4)
+        power = tests_dict[name_test]['power']
+        plt.barh([-index], [power], alpha=0.4)
+        plt.text(power / 2, -index, '%.3f' % power, ha='center', va = 'center', fontsize=14)
     index = np.arange(index)
     plt.yticks(-index - 1, tests_dict.keys(), fontsize=14)
     plt.xlim([-0.05, 1.05])
