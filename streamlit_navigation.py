@@ -33,7 +33,7 @@ def sbar():
         format='%f',
     )
 
-    _, col_cdf, _, col_power_hist, _ = st.columns((3, 10, 2, 14, 3))
+    _, col_cdf, _, col_power_hist, _ = st.columns((3, 11, 2, 14, 3))
 
     activ_names_test = []
     sidebar.write("# Тесты")
@@ -58,9 +58,9 @@ def sbar():
         if checkbox_baseline:
             activ_names_test.append(['Baseline', 'baseline/', 'bootstrap'])
         if checkbox_outliers:
-            activ_names_test.append(['Фил-ция', 'outliers/', 'bootstrap'])
+            activ_names_test.append(['Фильтрация', 'outliers/', 'bootstrap'])
         if checkbox_stratification:
-            activ_names_test.append(['Страт-ция', 'stratification/', 'bootstrap'])
+            activ_names_test.append(['Стратификация', 'stratification/', 'bootstrap'])
         if checkbox_cuped:
             activ_names_test.append(['CUPED', 'cuped/', 'bootstrap'])
         if checkbox_cupac:
@@ -87,16 +87,15 @@ def read_file_test(file_name_test):
 
     return power, test, cdf_x, cdf_y
 
-
 def plot_power_and_hist(col_power_hist, tests_dict, file_name_hist):
-    col_power_hist.write("#### Мощность")
+    col_power_hist.write("Мощность критериев")
     col_power_hist.pyplot(plot_power_dict(tests_dict=tests_dict))
 
     file = open(file_name_hist, 'r')
     value = np.array(file.readline().split()).astype(float)
     file.close()
 
-    col_power_hist.write("#### Гистограмма")
+    col_power_hist.write("Распределение данных в контрольных группах")
     col_power_hist.pyplot(plot_hist(value))
 
 def navigation(col_cdf, col_power_hist, activ_names_test, std_coef, zones_corr, effect_size):
@@ -130,9 +129,9 @@ def navigation(col_cdf, col_power_hist, activ_names_test, std_coef, zones_corr, 
                 'AA_cdf_y': AA_cdf_y,
             }
 
-        col_cdf.write("#### CDFs для H1")
+        col_cdf.write("Распределение p-value AB-тестов")
         col_cdf.pyplot(plot_ecdf_dict(tests_dict=tests_dict, test_v='AB', plot_legend=True))
-        col_cdf.write("#### CDFs для H0")
+        col_cdf.write("Распределение p-value AA-тестов")
         col_cdf.pyplot(plot_ecdf_dict(tests_dict=tests_dict, test_v='AA', plot_legend=True))
 
 

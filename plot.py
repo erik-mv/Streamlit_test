@@ -16,11 +16,11 @@ def plot_ecdf_dict(tests_dict, test_v='AB', plot_legend=False):
         plt.plot(x, y, drawstyle='steps-post', linewidth = 2, label=name_test)
     plt.xlim([-0.05, 1.05])
     plt.ylim([-0.05, 1.05])
-    plt.ylabel('Истинно положительные чистоты (TPR)', fontsize=14)
-    plt.xlabel('Ложноположительные чистоты (FPR)', fontsize=14)
+    #plt.ylabel('Истинно положительные чистоты (TPR)', fontsize=14)
+    #plt.xlabel('Ложноположительные чистоты (FPR)', fontsize=14)
     plt.grid(True)
     if plot_legend:
-        plt.legend(loc='lower right', fontsize=14)
+        plt.legend(loc='lower right', fontsize=16)
     return fig
 
 def plot_power_dict(tests_dict):
@@ -30,9 +30,10 @@ def plot_power_dict(tests_dict):
         index += 1
         power = tests_dict[name_test]['power']
         plt.barh([-index], [power], alpha=0.4)
-        plt.text(power / 2, -index, '%.3f' % power, ha='center', va = 'center', fontsize=14)
+        plt.text(0.02, -index, '%s: %.3f' % (name_test, power), ha='left', va = 'center', fontsize=14)
     index = np.arange(index)
-    plt.yticks(-index - 1, tests_dict.keys(), fontsize=14)
+    #plt.yticks(-index - 1, tests_dict.keys(), fontsize=14)
+    plt.yticks([])
     plt.xlim([-0.05, 1.05])
     plt.ylim([-index[-1] - 1.8, -0.2])
     plt.grid(True)
