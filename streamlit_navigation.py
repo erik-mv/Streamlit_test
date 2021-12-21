@@ -86,7 +86,9 @@ def read_file_test(file_name_test):
     power = float(file.readline())
     test = np.array(file.readline().split()).astype(float)
     cdf_x = np.array(file.readline().split()).astype(float)
+    cdf_x = np.append(cdf_x, 1.0)
     cdf_y = np.array(file.readline().split()).astype(float)
+    cdf_y = np.append(cdf_y, 1.0)
     file.close()
 
     return power, test, cdf_x, cdf_y
