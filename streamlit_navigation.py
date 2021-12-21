@@ -6,6 +6,10 @@ import os
 def sbar():
     sidebar = st.sidebar
 
+    sidebar.write("# Масштабирование графиков")
+    scale = sidebar.slider("Масштаб", 1, 20, step=1)
+    scale = int(scale)
+
     sidebar.write('# Навигатор')
     cheak_name = sidebar.radio('', ('Baseline', 'Оптимизации'))
 
@@ -33,7 +37,7 @@ def sbar():
         format='%f',
     )
 
-    _, col_cdf, _, col_power_hist, _ = st.columns((3, 11, 2, 14, 3))
+    _, col_cdf, _, col_power_hist, _ = st.columns((scale, 11, 2, 14, scale))
 
     activ_names_test = []
     sidebar.write("# Тесты")
